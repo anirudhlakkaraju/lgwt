@@ -17,10 +17,15 @@ func (d Dictionary) Search(key string) (string, error) {
 }
 
 func (d Dictionary) Add(key, value string) error {
-	_, ok := d[key]
-	if !ok {
+	_, err := d.Search(key)
+
+	switch err {
+	case ErrNotFound:
 		d[key] = value
-		return nil
+	case nil:
+		return ErrWordExists
+	default:
+		return err
 	}
-	return ErrWordExists
+	return nil
 }
