@@ -4,14 +4,17 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"time"
 )
 
 const finalWord = "Go!"
 const countdownStart = 3
+const waitTime = 1 * time.Second
 
 func Countdown(out io.Writer) {
 	for i := countdownStart; i > 0; i-- {
 		fmt.Fprintln(out, i)
+		time.Sleep(waitTime)
 	}
 	fmt.Fprint(out, finalWord)
 }
