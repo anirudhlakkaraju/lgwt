@@ -1,17 +1,21 @@
 package sel
 
 import (
+	"errors"
 	"net/http"
+	"time"
 )
 
-func Racer(a, b string) (winner string) {
+func Racer(a, b string) (winner string, err error) {
 	// 	Waiting for values to be sent to a channel with myVar := <-ch is a blocking call
 	// `select` allows you to wait on multiple channels. The first one to send a value "wins" and the code underneath the case is executed.
 	select {
 	case <-ping(a):
-		return a
+		return a, nil
 	case <-ping(b):
-		return b
+		return b, nil
+	case <-time.After(10 * time.Second):
+		return "", errors.New("request took too long and timed out")
 	}
 }
 
