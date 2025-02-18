@@ -20,15 +20,20 @@ func TestCounter(t *testing.T) {
 		counter := NewCounter()
 
 		var wg sync.WaitGroup
+
+		// Add count of dones
 		wg.Add(wantedCount)
 
 		for i := 0; i < wantedCount; i++ {
 			go func() {
 				counter.Inc()
+
+				// Wait till goroutine is complete
 				wg.Done()
 
 			}()
 		}
+		// Wait until all goroutines are complete
 		wg.Wait()
 
 		assertCounter(t, counter, wantedCount)

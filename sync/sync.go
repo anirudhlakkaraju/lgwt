@@ -12,6 +12,8 @@ func NewCounter() *Counter {
 }
 
 func (c *Counter) Inc() {
+	// Current execution locks Counter
+	// preventing other goroutines/calls from interrupting
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.value++
