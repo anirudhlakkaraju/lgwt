@@ -1,16 +1,29 @@
 package context
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
 
 type Store interface {
+	Fetch(ctx context.Context) (string, error)
+}
+
+func Server(store Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		data, _ := store.Fetch(r.Context())
+		fmt.Fprint(w, data)
+	}
+}
+
+// Implementation before propagating context
+type StoreLegacy interface {
 	Fetch() string
 	Cancel()
 }
 
-func Server(store Store) http.HandlerFunc {
+func ServerLegacy(store StoreLegacy) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		// context has a method Done() which returns a channel
