@@ -11,6 +11,21 @@ import (
 type SpyStore struct {
 	response  string
 	cancelled bool
+	t         *testing.T
+}
+
+func (s *SpyStore) assertWasCancelled() {
+	s.t.Helper()
+	if !s.cancelled {
+		s.t.Errorf("expected request to get cancelled")
+	}
+}
+
+func (s *SpyStore) assertWasNotCancelled() {
+	s.t.Helper()
+	if s.cancelled {
+		s.t.Errorf("request shouldn't have been cancelled")
+	}
 }
 
 func (s *SpyStore) Fetch() string {
@@ -25,7 +40,7 @@ func (s *SpyStore) Cancel() {
 func TestServer(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
 		data := "hello, world"
-		store := &SpyStore{response: data}
+		store := &SpyStore{response: data, t: t}
 		svr := Server(store)
 
 		request := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -37,14 +52,12 @@ func TestServer(t *testing.T) {
 			t.Errorf(`got "%s", want "%s"`, response.Body.String(), data)
 		}
 
-		if store.cancelled {
-			t.Errorf("it shouldn't have been cancelled")
-		}
+		store.assertWasNotCancelled()
 	})
 
 	t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
 		data := "hello, world"
-		store := &SpyStore{response: data}
+		store := &SpyStore{response: data, t: t}
 		svr := Server(store)
 
 		request := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -57,8 +70,6 @@ func TestServer(t *testing.T) {
 
 		svr.ServeHTTP(response, request)
 
-		if !store.cancelled {
-			t.Errorf("store was told not to cancel")
-		}
+		store.assertWasCancelled()
 	})
 }
