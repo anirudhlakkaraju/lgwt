@@ -30,6 +30,7 @@ type StoreLegacy interface {
 	Cancel()
 }
 
+// ServerLegacy is the legacy server implentation
 func ServerLegacy(store StoreLegacy) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
